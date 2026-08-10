@@ -1,15 +1,18 @@
+export type UserRole = 'student' | 'instructor' | 'admin';
+
 export interface User {
   id: string;
   fullName: string;
   email: string;
+  role: UserRole;
 
-  // NEW
-  role: 'student' | 'instructor';
+  studentId?: string;
 
-  studentId: string;
   avatarUrl?: string;
+
   enrolledCourseIds: string[];
   completedCourseIds: string[];
+
   createdAt: string;
 }
 
@@ -23,8 +26,6 @@ export interface RegisterPayload {
   fullName: string;
   email: string;
   password: string;
-
-  // NEW
   role: 'student' | 'instructor';
 }
 
