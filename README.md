@@ -184,3 +184,4 @@ state) needs no changes.
 
 docker run -p 4200:4200 -v ${PWD}:/app -v /app/node_modules cloudpath-frontend
 docker run -p 4200:4200 -v "${PWD}:/app" -v /app/node_modules cloudpath-frontend
+hi bro git
