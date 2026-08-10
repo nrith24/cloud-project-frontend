@@ -81,6 +81,19 @@ export const routes: Routes = [
 
     title: 'Admin Dashboard — CloudPath',
   },
+  //instructor dashboard
+  {
+  path: 'instructor',
+  loadComponent: () =>
+    import('./features/instructor/instructor.component').then(
+      (m) => m.InstructorComponent
+    ),
+  canActivate: [
+    authGuard,
+    roleGuard('instructor'),
+  ],
+  title: 'Instructor Dashboard — CloudPath',
+},
 
   // About
   {
