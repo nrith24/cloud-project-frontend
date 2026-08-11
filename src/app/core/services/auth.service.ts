@@ -11,8 +11,18 @@ import {
 } from '../models/user.model';
 
 import { MOCK_USERS } from '../data/mock-db';
+
 const STORAGE_KEY = 'cloudpath_auth';
 const PENDING_KEY = 'cloudpath_pending_registration';
+
+/**
+ * Used only for the first-time student skill setup flow.
+ *
+ * This does NOT replace the authentication state.
+ * It only remembers that a newly registered student
+ * still needs to complete the initial skill setup.
+ */
+const SKILL_SETUP_KEY = 'cloudpath_initial_skill_setup';
 
 interface StoredAuth {
   user: User;
@@ -458,21 +468,33 @@ export class AuthService {
   /**
    * Assign a course to a student.
    */
-  assignCourseToStudent(studentId: string, courseId: string): boolean {
+  assignCourseToStudent(
+    studentId: string,
+    courseId: string
+  ): boolean {
     const student = MOCK_USERS.find(
-      user => user.id === studentId && user.role === 'student'
+      user =>
+        user.id === studentId &&
+        user.role === 'student'
     );
 
     if (!student) {
       return false;
     }
 
-    if (!student.enrolledCourseIds.includes(courseId)) {
-      student.enrolledCourseIds.push(courseId);
+    if (
+      !student.enrolledCourseIds.includes(
+        courseId
+      )
+    ) {
+      student.enrolledCourseIds.push(
+        courseId
+      );
     }
 
     return true;
   }
+
   getToken(): string | null {
     try {
       const raw =
@@ -492,6 +514,53 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+
+  // ============================================================
+  // INITIAL STUDENT SKILL SETUP
+  // ============================================================
+
+  /**
+   * Mark that the newly registered student
+   * must complete the initial skill setup.
+   *
+   * This is stored separately from authentication.
+   *
+   * It is only used during the first-time
+   * registration flow.
+   */
+  markInitialSkillSetupRequired(): void {
+    sessionStorage.setItem(
+      SKILL_SETUP_KEY,
+      'true'
+    );
+  }
+
+  /**
+   * Check whether the current registration flow
+   * still requires the initial skill setup.
+   *
+   * Returns true only when the flag exists
+   * in sessionStorage.
+   */
+  needsInitialSkillSetup(): boolean {
+    return (
+      sessionStorage.getItem(
+        SKILL_SETUP_KEY
+      ) === 'true'
+    );
+  }
+
+  /**
+   * Clear the initial skill setup requirement
+   * after the student successfully submits
+   * their skills.
+   */
+  clearInitialSkillSetup(): void {
+    sessionStorage.removeItem(
+      SKILL_SETUP_KEY
+    );
   }
 }
 
