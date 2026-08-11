@@ -1,5 +1,5 @@
-
 import { Component, computed, inject } from '@angular/core';
+import { User } from '../../core/models/user.model';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -11,8 +11,9 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class InstructorComponent {
   private auth = inject(AuthService);
-
+  
   readonly currentUser = this.auth.currentUser;
+  students: User[] = this.auth.getStudents();
 
   // Temporary instructor course data
   courses = [
@@ -43,31 +44,52 @@ export class InstructorComponent {
   ];
 
   readonly totalStudents = computed(() =>
-    this.courses.reduce(
-      (total, course) =>
-        total + course.students,
-      0
-    )
+    this.courses.reduce((total, course) => total + course.students, 0)
   );
 
-  readonly totalCourses = computed(
-    () => this.courses.length
-  );
+  readonly totalCourses = computed(() => this.courses.length);
 
   readonly averageProgress = computed(() => {
     if (this.courses.length === 0) {
       return 0;
     }
-
     const total = this.courses.reduce(
-      (sum, course) =>
-        sum + course.progress,
+      (sum, course) => sum + course.progress,
       0
     );
-
-    return Math.round(
-      total / this.courses.length
-    );
+    return Math.round(total / this.courses.length);
   });
-}
 
+  openAssignUser(course: any): void {
+    const studentList = this.students
+      .map((student, index) => `${index + 1}. ${student.fullName}`)
+      .join('\n');
+
+    const choice = prompt(
+      `Assign "${course.title}"\n\nChoose a student:\n\n${studentList}\n\nEnter the number:`
+    );
+
+    if (!choice) {
+      return;
+    }
+
+    const index = Number(choice) - 1;
+
+    if (index < 0 || index >= this.students.length) {
+      alert('Invalid selection.');
+      return;
+    }
+
+    const student = this.students[index];
+    const success = this.auth.assignCourseToStudent(
+      student.id,
+      course.id
+    );
+
+    if (success) {
+      alert(`${course.title} assigned to ${student.fullName}`);
+    } else {
+      alert('Assignment failed.');
+    }
+  }
+}

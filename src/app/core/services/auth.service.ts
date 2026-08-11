@@ -11,7 +11,6 @@ import {
 } from '../models/user.model';
 
 import { MOCK_USERS } from '../data/mock-db';
-
 const STORAGE_KEY = 'cloudpath_auth';
 const PENDING_KEY = 'cloudpath_pending_registration';
 
@@ -440,9 +439,40 @@ export class AuthService {
     );
   }
 
+  getStudents(): User[] {
+    return MOCK_USERS
+      .filter(user => user.role === 'student')
+      .map(user => ({
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        studentId: user.studentId,
+        avatarUrl: user.avatarUrl,
+        enrolledCourseIds: [...user.enrolledCourseIds],
+        completedCourseIds: [...user.completedCourseIds],
+        createdAt: user.createdAt
+      }));
+  }
+
   /**
-   * Get the stored JWT-like token.
+   * Assign a course to a student.
    */
+  assignCourseToStudent(studentId: string, courseId: string): boolean {
+    const student = MOCK_USERS.find(
+      user => user.id === studentId && user.role === 'student'
+    );
+
+    if (!student) {
+      return false;
+    }
+
+    if (!student.enrolledCourseIds.includes(courseId)) {
+      student.enrolledCourseIds.push(courseId);
+    }
+
+    return true;
+  }
   getToken(): string | null {
     try {
       const raw =

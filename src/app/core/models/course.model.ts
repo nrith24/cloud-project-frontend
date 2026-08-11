@@ -10,6 +10,7 @@ export interface Course {
   durationHours: number;
   price: number;
   description: string;
+  assignedUsers?: string[];
 }
 
 export interface EnrolledCourse extends Course {
